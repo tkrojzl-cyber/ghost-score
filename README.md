@@ -7,7 +7,6 @@
 
 **Offline digital security audit. No account. No network calls. One file.**
 
-![ghost-score screenshot](screenshot.png)
 
 ---
 
@@ -95,7 +94,7 @@ You'll find nothing. The entire tool is 150 lines of Python. Read it before you 
 python ghost-score.py           # run the assessment
 python ghost-score.py --version # print version and exit
 python ghost-score.py --help    # show usage
-python ghost-score.py --csv    # export results to ghost-score-results.csv
+python ghost-score.py --csv    # export scoring schema to ghost-score-schema.csv
 ```
 
 ---
