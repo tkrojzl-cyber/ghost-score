@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-ghost-score.py — Offline digital security audit.
+ghost-score.py - Offline digital security audit.
 No account. No network calls. One file.
-Built by Brainiac Ltd — ghost-os.online
+Built by Brainiac Ltd - ghost-os.online
 """
 
 __version__ = "1.0.0"
@@ -13,6 +13,7 @@ import argparse
 parser = argparse.ArgumentParser(description="ghost-score: offline digital security audit", add_help=True)
 parser.add_argument("--version", action="store_true", help="Print version and exit")
 parser.add_argument("--json", action="store_true", help="Output results as JSON and exit")
+parser.add_argument("--csv", action="store_true", help="Export scoring schema to ghost-score-results.csv and exit")
 args = parser.parse_args()
 
 if args.version:
@@ -38,17 +39,17 @@ AMBER     = "#FFAA00"
 
 QUESTIONS = [
     {"id":1,"vector":"Password hygiene","text":"How do you manage your passwords?","options":[("I use a password manager with unique passwords everywhere",8),("I use a password manager but reuse some passwords",5),("I have a system but no password manager",2),("I reuse passwords across sites",0)]},
-    {"id":2,"vector":"VPN usage","text":"Do you use a VPN?","options":[("Yes — self-hosted or open-source (WireGuard / Mullvad)",8),("Yes — commercial VPN (NordVPN / ExpressVPN etc)",5),("Only sometimes, on public Wi-Fi",2),("No",0)]},
+    {"id":2,"vector":"VPN usage","text":"Do you use a VPN?","options":[("Yes - self-hosted or open-source (WireGuard / Mullvad)",8),("Yes - commercial VPN (NordVPN / ExpressVPN etc)",5),("Only sometimes, on public Wi-Fi",2),("No",0)]},
     {"id":3,"vector":"Device encryption","text":"Are your devices encrypted?","options":[("Full-disk encryption on all devices",8),("Most devices encrypted",5),("Only my phone",2),("Nothing is encrypted",0)]},
     {"id":4,"vector":"Browser privacy","text":"What browser setup do you use?","options":[("Firefox / Librewolf hardened + uBlock Origin",8),("Brave or Firefox with privacy extensions",5),("Chrome or Safari with some extensions",2),("Default browser, no extensions",0)]},
     {"id":5,"vector":"Local backup","text":"How do you back up critical data?","options":[("Encrypted local backup + offsite / encrypted cloud",8),("Regular local backup (external drive)",5),("Cloud only (Google Drive / iCloud etc)",2),("No backup strategy",0)]},
     {"id":6,"vector":"Encrypted comms","text":"How do you communicate sensitive information?","options":[("Signal for all sensitive comms, self-hosted email",8),("Signal or Matrix for some conversations",5),("WhatsApp (metadata exposed)",2),("SMS / standard email only",0)]},
-    {"id":7,"vector":"Mesh network capability","text":"Can you communicate if the internet goes down?","options":[("Yes — Meshtastic / LoRa radio or ham setup",8),("Yes — local mesh network (Reticulum / similar)",5),("No, but I know what Meshtastic is",2),("No and I haven't considered it",0)]},
-    {"id":8,"vector":"Network awareness","text":"Do you know what's on your home network?","options":[("Yes — router-level monitoring, VLAN segmentation",8),("Yes — I run nmap or similar scans occasionally",5),("I know my main devices but not guests/IoT",2),("No idea what's connected",0)]},
-    {"id":9,"vector":"App permissions","text":"How do you manage app permissions?","options":[("Regular audit — location/mic/camera all restricted",8),("I review permissions when installing",5),("I decline obvious ones but don't audit",2),("I accept defaults and never review",0)]},
+    {"id":7,"vector":"Mesh network capability","text":"Can you communicate if the internet goes down?","options":[("Yes - Meshtastic / LoRa radio or ham setup",8),("Yes - local mesh network (Reticulum / similar)",5),("No, but I know what Meshtastic is",2),("No and I haven't considered it",0)]},
+    {"id":8,"vector":"Network awareness","text":"Do you know what's on your home network?","options":[("Yes - router-level monitoring, VLAN segmentation",8),("Yes - I run nmap or similar scans occasionally",5),("I know my main devices but not guests/IoT",2),("No idea what's connected",0)]},
+    {"id":9,"vector":"App permissions","text":"How do you manage app permissions?","options":[("Regular audit - location/mic/camera all restricted",8),("I review permissions when installing",5),("I decline obvious ones but don't audit",2),("I accept defaults and never review",0)]},
     {"id":10,"vector":"Two-factor authentication","text":"How do you use 2FA?","options":[("Hardware key (YubiKey) or TOTP app for everything critical",8),("Authenticator app on most accounts",5),("SMS 2FA on some accounts",2),("No 2FA on any accounts",0)]},
-    {"id":11,"vector":"Offline power","text":"Can you power critical devices without mains electricity?","options":[("Yes — solar + battery bank or generator",8),("Large power bank for phones and laptop",5),("Small power bank for phone only",2),("Nothing, fully dependent on mains",0)]},
-    {"id":12,"vector":"Offline workflow","text":"Can you work if your internet connection fails?","options":[("Yes — local LLM, offline tools, no cloud dependency",8),("Most things work, a few cloud dependencies",5),("Limited — some offline apps but mostly cloud",2),("Completely dependent on internet connectivity",0)]},
+    {"id":11,"vector":"Offline power","text":"Can you power critical devices without mains electricity?","options":[("Yes - solar + battery bank or generator",8),("Large power bank for phones and laptop",5),("Small power bank for phone only",2),("Nothing, fully dependent on mains",0)]},
+    {"id":12,"vector":"Offline workflow","text":"Can you work if your internet connection fails?","options":[("Yes - local LLM, offline tools, no cloud dependency",8),("Most things work, a few cloud dependencies",5),("Limited - some offline apps but mostly cloud",2),("Completely dependent on internet connectivity",0)]},
 ]
 
 MAX_SCORE = len(QUESTIONS) * 8
@@ -225,6 +226,18 @@ class GhostScore(App):
 
 if args.json:
     print(json.dumps({"tool":"ghost-score","version":__version__,"vectors":[q["vector"] for q in QUESTIONS],"max_score":MAX_SCORE,"tiers":[{"min":t[0],"label":t[1]} for t in TIERS]},indent=2))
+    sys.exit(0)
+
+if args.csv:
+    import csv as _csv
+    outfile = "ghost-score-schema.csv"
+    with open(outfile, "w", newline="") as f:
+        w = _csv.writer(f)
+        w.writerow(["id","vector","option","points"])
+        for q in QUESTIONS:
+            for opt_text, opt_pts in q["options"]:
+                w.writerow([q["id"], q["vector"], opt_text, opt_pts])
+    print(f"Schema exported to {outfile}")
     sys.exit(0)
 
 if __name__ == "__main__":
