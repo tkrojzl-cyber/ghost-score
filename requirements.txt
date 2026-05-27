@@ -1,0 +1,4 @@
+textual>=0.50.0
+pyfiglet>=0.8.0
+colorama>=0.4.6
+qrcode>=7.4.2
